@@ -6,12 +6,16 @@ import com.example.LibraryManagement.Entity.Reader;
 import com.example.LibraryManagement.Repository.BookRepo;
 import com.example.LibraryManagement.Repository.ReaderRepo;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ReaderService {
 
     private final BookRepo bookRepo;
@@ -33,6 +37,7 @@ public class ReaderService {
         return mapToDTO(saved);
     }
 
+    @Cacheable(value = "readers" , key = "readerId")
     public ReaderResponseDTO getReaderById(Long id) {
          Reader reader = readerRepo.getById(id);
         return mapToDTO(reader);
@@ -42,6 +47,7 @@ public class ReaderService {
         return readerRepo.findAll();
     }
 
+    @CacheEvict(value = "readers", key ="readerId")
     public void deleteById(Long id) {
         readerRepo.deleteById(id);
     }

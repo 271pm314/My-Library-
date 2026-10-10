@@ -3,7 +3,7 @@ package com.example.LibraryManagement.Controller;
 import com.example.LibraryManagement.DTO.BookRequestDTO;
 import com.example.LibraryManagement.DTO.BookResponseDTO;
 import com.example.LibraryManagement.Entity.Book;
-import com.example.LibraryManagement.Service.LibraryService;
+import com.example.LibraryManagement.Service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.LibraryManagement.Service.LibraryService.mapToDTO;
+import static com.example.LibraryManagement.Service.BookService.mapToDTO;
 
 @RestController
 @RequestMapping("/api/v1/books")
 public class BookController {
 
-   private final LibraryService lService;
+   private final BookService lService;
 
-    public BookController(LibraryService lService) {
+    public BookController(BookService lService) {
         this.lService = lService;
     }
 

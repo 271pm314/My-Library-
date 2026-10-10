@@ -6,12 +6,14 @@ import com.example.LibraryManagement.Entity.Author;
 import com.example.LibraryManagement.Repository.AuthorRepo;
 import com.example.LibraryManagement.Repository.BookRepo;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class AuthorService {
@@ -20,6 +22,8 @@ public class AuthorService {
     private final AuthorRepo authorRepo;
 
     public AuthorResponseDTO createAuthor(AuthorRequestDTO dto) {
+
+        log.info("Processing Author Registration Request");
 
         if(authorRepo.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Author with Email " + dto.getEmail() + " already exists");
@@ -30,9 +34,13 @@ public class AuthorService {
 
 
         Author saved = authorRepo.save(author);
+
+        log.info("Author Created With Id {} ", author.getId());
+
         return mapToDTO(saved);
     }
 
+    @Cacheable(value = "authors", key = "authorId")
     public AuthorResponseDTO getAuthorById(Long id) {
         Author author = authorRepo.getById(id);
         return mapToDTO(author);
@@ -42,6 +50,7 @@ public class AuthorService {
         return authorRepo.findAll();
     }
 
+    @CacheEvict(value = "authors", key = "authorId")
     public void deleteById(Long id) {
         authorRepo.deleteById(id);
     }

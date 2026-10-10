@@ -5,11 +5,13 @@ import com.example.LibraryManagement.Entity.BookStatus;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
-public class BorrowResponseDTO {
+public class BorrowResponseDTO implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private long borrowId;
 
     private Book book;

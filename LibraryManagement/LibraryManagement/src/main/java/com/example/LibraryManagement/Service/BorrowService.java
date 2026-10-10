@@ -11,10 +11,13 @@ import com.example.LibraryManagement.Repository.BorrowRepo;
 import com.example.LibraryManagement.Repository.ReaderRepo;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class BorrowService {
@@ -29,7 +32,11 @@ public class BorrowService {
 
 
     @Transactional
+    @CacheEvict(value = "books", key = "#bookId")
     public BorrowResponseDTO Borrow(long readerId, long bookId) {
+
+        log.info("Processing book loan request. BookId: {}, ReaderId: {}", bookId, readerId);
+
         Reader reader = readerRepo.findById(readerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reader not found"));
         Book book = bookRepo.findById(bookId)
@@ -56,12 +63,20 @@ public class BorrowService {
         borrowRecord.setReturnDate(LocalDate.now().plusDays(MAX_DUE_DAYS));
         borrowRepo.save(borrowRecord);
 
+        log.info("Book successfully loaned. RecordId: {}, DueDate: {}",
+                borrowRecord.getId(), borrowRecord.getDueDate());
+
         return mapToDTO(borrowRecord);
 
     }
 
     @Transactional
+    @CacheEvict(value = "books", key = "#bookId")
     public BorrowResponseDTO returnBook(Long bookId, Long readerId) {
+
+        log.info("Processing book return request. BookId: {}, ReaderId: {}", bookId, readerId);
+
+
         BorrowRecord record = borrowRepo.findByBook_IdAndReader_IdAndStatus(bookId, readerId, BookStatus.BORROWED);
 
         //    .orElseThrow(() -> new ResourceNotFoundException("No active borrow record found for this book and reader"));
@@ -80,6 +95,9 @@ public class BorrowService {
             record.setFine(overdueDays * DAILY_FINE);
 
         }
+
+        log.info("Book successfully returned. RecordId: {}, ReturnDate: {}",
+                record.getId(), record.getReturnDate());
 
         return mapToDTO(record);
 
